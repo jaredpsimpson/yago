@@ -1,0 +1,63 @@
+﻿@page
+@model StatusModel
+@{
+    ViewData["Title"] = "Status";
+}
+
+<div class="container py-5">
+    <h1 class="text-center mb-4">IoT Device Status</h1>
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6 text-center">
+            <div id="deviceStatus" class="status-box">
+                Loading status...
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <button id="triggerButton" class="btn btn-primary trigger-btn">
+                🔧 Trigger Device Function
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const statusBox = document.getElementById('deviceStatus');
+    const triggerButton = document.getElementById('triggerButton');
+
+    const statusApi = './api/device/status';
+    const triggerApi = './api/device/trigger';
+
+    async function fetchStatus() {
+        try {
+            const response = await fetch(statusApi);
+            const data = await response.json();
+            statusBox.textContent = `Status: ${data.status}`;
+        } catch (error) {
+            statusBox.textContent = 'Error fetching status';
+            console.error(error);
+        }
+    }
+
+    async function triggerFunction() {
+        triggerButton.disabled = true;
+        triggerButton.textContent = '⏳ Triggering...';
+        try {
+            const response = await fetch(triggerApi, { method: 'POST' });
+            const result = await response.json();
+            statusBox.textContent = `Device response: ${result.message}`;
+        } catch (error) {
+            statusBox.textContent = 'Failed to trigger device';
+            console.error(error);
+        } finally {
+            triggerButton.disabled = false;
+            triggerButton.textContent = '🔧 Trigger Device Function';
+        }
+    }
+
+    triggerButton.addEventListener('click', triggerFunction);
+    fetchStatus();
+</script>
